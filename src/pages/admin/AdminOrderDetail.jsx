@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
+import OrderStatusBadge from "../../components/OrderStatusBadge";
 
 export default function AdminOrderDetail() {
   const { id } = useParams();
@@ -34,9 +35,12 @@ export default function AdminOrderDetail() {
 
   return (
     <div className="max-w-xl mx-auto mt-6 p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-3">
-        Order <span className="text-blue-600">{shortId}</span>
-      </h2>
+      <div className="flex items-center gap-3 justify-between">
+        <h2 className="text-2xl font-bold mb-3">
+          Order <span className="text-blue-600">{shortId}</span>
+        </h2>
+        <OrderStatusBadge status={order.status} />
+      </div>
 
       <p>Total: ₹{order.total}</p>
       <p>Status: {order.status}</p>

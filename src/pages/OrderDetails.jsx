@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useParams } from "react-router-dom";
+import OrderStatusBadge from "../components/OrderStatusBadge";
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -39,9 +40,12 @@ export default function OrderDetails() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">
-        Order {shortId(order.id)}
-      </h1>
+      
+
+      <div className="flex items-center gap-3 justify-between">
+        <h1 className="text-2xl font-bold mb-2">Order {shortId(order.id)}</h1>
+        <OrderStatusBadge status={order.status} />
+      </div>
 
       {/* Status */}
       <span
@@ -52,7 +56,8 @@ export default function OrderDetails() {
         {order.status === "paid" ? "Paid" : "Unpaid"}
       </span>
 
-      <br /><br />
+      <br />
+      <br />
 
       {/* Delivery Badge */}
       <span
@@ -63,13 +68,9 @@ export default function OrderDetails() {
         {order.delivery_type === "pickup" ? "Self Pickup" : "Home Delivery"}
       </span>
 
-      <p className="mt-3 font-semibold">
-        Total: ₹{order.total}
-      </p>
+      <p className="mt-3 font-semibold">Total: ₹{order.total}</p>
 
-      <p className="text-gray-600">
-        Date: {formatDate(order.created_at)}
-      </p>
+      <p className="text-gray-600">Date: {formatDate(order.created_at)}</p>
 
       {/* Address Dropdown for Home Delivery */}
       {order.delivery_type === "delivery" && order.address && (
@@ -83,12 +84,24 @@ export default function OrderDetails() {
 
           {showAddress && (
             <div className="mt-3 bg-gray-100 p-3 rounded">
-              <p><b>Name:</b> {order.address.name}</p>
-              <p><b>Phone:</b> {order.address.phone}</p>
-              <p><b>Address 1:</b> {order.address.line1}</p>
-              <p><b>Address 2:</b> {order.address.line2}</p>
-              <p><b>City:</b> {order.address.city}</p>
-              <p><b>Pincode:</b> {order.address.pincode}</p>
+              <p>
+                <b>Name:</b> {order.address.name}
+              </p>
+              <p>
+                <b>Phone:</b> {order.address.phone}
+              </p>
+              <p>
+                <b>Address 1:</b> {order.address.line1}
+              </p>
+              <p>
+                <b>Address 2:</b> {order.address.line2}
+              </p>
+              <p>
+                <b>City:</b> {order.address.city}
+              </p>
+              <p>
+                <b>Pincode:</b> {order.address.pincode}
+              </p>
             </div>
           )}
         </div>

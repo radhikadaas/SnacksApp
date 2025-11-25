@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
@@ -29,7 +29,7 @@ export default function Payment() {
       return;
     }
 
-    // Home delivery must have full address
+    // Require address if delivery
     if (deliveryType === "delivery") {
       if (
         !address.name ||
@@ -43,27 +43,24 @@ export default function Payment() {
       }
     }
 
-    // Determine status
-    let paymentStatus = "pending";
-
-    if (deliveryType === "delivery") {
-      paymentStatus = "paid"; // Home delivery requires online payment
-    } else {
-      // pickup
-      if (paymentMethod === "online") paymentStatus = "paid";
-      else if (paymentMethod === "cod") paymentStatus = "unpaid";
+    // Determine payment status
+    let payment_status = "unpaid";
+    if (paymentMethod === "online") {
+      payment_status = "paid";
     }
 
+    // FINAL ORDER PAYLOAD
     const orderPayload = {
       user_id: user.id,
       items: cart,
       total,
-      status: paymentStatus,
-      delivery_type: deliveryType, // ✔ correctly saved
+      status: "ordered", // default order status
+      payment_status,
+      delivery_type: deliveryType,
       address: deliveryType === "delivery" ? address : null,
     };
 
-    console.log("Submitting order:", orderPayload);
+    console.log("Creating order:", orderPayload);
 
     const { error } = await supabase.from("orders").insert(orderPayload);
 
@@ -102,7 +99,7 @@ export default function Payment() {
               checked={deliveryType === "delivery"}
               onChange={() => {
                 setDeliveryType("delivery");
-                setPaymentMethod("online");
+                setPaymentMethod("online"); // COD disabled for delivery
               }}
             />
             <span className="ml-2">Home Delivery</span>
@@ -110,7 +107,7 @@ export default function Payment() {
         </div>
       </div>
 
-      {/* Payment Method – always shown */}
+      {/* Payment Method */}
       <div className="mb-6">
         <label className="font-semibold">Payment Method:</label>
 
@@ -135,9 +132,7 @@ export default function Payment() {
               checked={paymentMethod === "cod"}
               onChange={() => setPaymentMethod("cod")}
             />
-            <span>
-              Cash on Delivery {deliveryType === "delivery" && "(Pickup Only)"}
-            </span>
+            <span>Cash on Pickup</span>
           </label>
         </div>
       </div>
@@ -160,6 +155,20 @@ export default function Payment() {
               />
             )
           )}
+        </div>
+      )}
+
+      {/* DELIVERY CHARGE NOTICE (Only for Home Delivery) */}
+      {deliveryType === "delivery" && (
+        <div className="bg-gray-200 border border-gray-300 p-4 rounded mb-6">
+          <h3 className="font-semibold text-lg mb-1">Delivery Charge Notice</h3>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Our home delivery is fulfilled using <strong>Ola / Uber / Auto</strong>.
+            Delivery charges vary based on your location.
+            <br /><br />
+            We will confirm the delivery charge shortly. You can pay the delivery
+            amount <strong>later at the time of delivery to that Person only.</strong>
+          </p>
         </div>
       )}
 
@@ -191,139 +200,3 @@ export default function Payment() {
     </div>
   );
 }
-
-// import { useCart } from "../context/CartContext";
-// import { useNavigate } from "react-router-dom";
-// import toast from "react-hot-toast";
-// import { supabase, createOrder } from "../lib/supabaseClient";
-
-// export default function Payment() {
-//   const { cart, /* add clearCart function in your CartContext if not present */ updateQty, removeItem } = useCart();
-//   const navigate = useNavigate();
-
-//   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-//   const total_cents = total * 100;
-
-//   // Put your Razorpay key (test) or set via env
-//   const RAZORPAY_KEY = "rzp_test_1234567890";
-
-//   function loadRazorpayScript(src) {
-//     return new Promise((resolve) => {
-//       const script = document.createElement("script");
-//       script.src = src;
-//       script.onload = () => resolve(true);
-//       script.onerror = () => resolve(false);
-//       document.body.appendChild(script);
-//     });
-//   }
-
-//   async function saveOrderToDb({ userId, items, total_cents, delivery_type = "pickup", address = null, payment_provider = "razorpay", payment_provider_id = null }) {
-//     const orderObj = {
-//       user_id: userId,
-//       items: items,
-//       total_cents,
-//       currency: "INR",
-//       delivery_type,
-//       address,
-//       delivery_charge_cents: 0,
-//       payment_status: payment_provider_id ? "paid" : "pending",
-//       payment_provider,
-//       payment_provider_id,
-//       order_status: payment_provider_id ? "ordered" : "pending"
-//     };
-
-//     const created = await createOrder(orderObj);
-//     return created;
-//   }
-
-//   async function startPayment() {
-//     const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
-//     if (!res) {
-//       alert("Failed to load Razorpay SDK.");
-//       return;
-//     }
-
-//     // get user session
-//     const { data: { session } } = await supabase.auth.getSession();
-//     const userId = session?.user?.id;
-//     if (!userId) {
-//       toast.error("Please login to pay.");
-//       navigate(`/login?redirect=/payment`);
-//       return;
-//     }
-
-//     const options = {
-//       key: RAZORPAY_KEY,
-//       amount: total_cents,
-//       currency: "INR",
-//       name: "Snacks App",
-//       description: "Order Payment",
-//       handler: async function (response) {
-//         // response contains razorpay_payment_id, razorpay_order_id, razorpay_signature
-//         try {
-//           // Save order to DB with payment_provider_id returned by Razorpay
-//           const created = await saveOrderToDb({
-//             userId,
-//             items: cart,
-//             total_cents,
-//             payment_provider_id: response.razorpay_payment_id,
-//             payment_provider: "razorpay",
-//             delivery_type: "pickup"
-//           });
-
-//           toast.success("Payment successful — order placed!");
-//           // clear cart: implement clearCart() in CartContext and call it here
-//           if (typeof window !== "undefined" && window.localStorage) {
-//             localStorage.removeItem("cart");
-//           }
-//           // Optionally call context clearCart if available
-//           navigate(`/orders`);
-//         } catch (err) {
-//           console.error("Failed save order:", err);
-//           toast.error("Payment succeeded but saving order failed.");
-//           navigate(`/orders`);
-//         }
-//       },
-//       prefill: {
-//         name: session.user?.user_metadata?.full_name || session.user?.email || "Customer",
-//         email: session.user?.email || "",
-//         contact: session.user?.phone || ""
-//       },
-//       theme: {
-//         color: "#3399cc",
-//       },
-//     };
-
-//     const razorpay = new window.Razorpay(options);
-
-//     // optional: catch payment failed event
-//     razorpay.on("payment.failed", function (response) {
-//       toast.error("Payment failed");
-//       console.error("payment.failed", response);
-//     });
-
-//     razorpay.open();
-//   }
-
-//   if (cart.length === 0) return <h1 className="text-center mt-6">Your cart is empty</h1>;
-
-//   return (
-//     <div className="max-w-lg mx-auto p-4">
-//       <h1 className="text-2xl font-bold mb-4">Payment</h1>
-
-//       <div className="bg-white p-4 rounded shadow-md mb-4">
-//         <h2 className="font-semibold mb-3">Order Summary</h2>
-//         {cart.map((item) => (
-//           <div key={item.id} className="flex justify-between mb-2">
-//             <span>{item.name} x {item.qty}</span>
-//             <span>₹{item.price * item.qty}</span>
-//           </div>
-//         ))}
-//         <hr className="my-2" />
-//         <h3 className="font-bold text-lg">Total: ₹{total}</h3>
-//       </div>
-
-//       <button onClick={startPayment} className="w-full bg-blue-600 text-white py-2 rounded text-lg">Pay Now</button>
-//     </div>
-//   );
-// }

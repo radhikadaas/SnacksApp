@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import ProductForm from "./ProductForm";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -43,6 +44,13 @@ export default function Dashboard() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
+
+      <Link
+        to={`/admin/orders`}
+        className="inline-block m-3 bg-blue-600 text-white px-4 py-1 rounded"
+      >
+        Admin Order
+      </Link>
 
       {/* Add new product */}
       <button
