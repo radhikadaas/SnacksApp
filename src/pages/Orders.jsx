@@ -56,18 +56,19 @@ export default function Orders() {
             </span>
           </div>
 
-          <div className="flex justify-between items-center">
-            <OrderStatusBadge status={o.status} />
-          </div>
+          <div className="flex justify-between">
+            {/* ORDER STATUS BADGE */}
+            <OrderStatusBadge status={o.order_status} />
 
-          {/* Payment Badge */}
-          <span
-            className={`inline-block mt-2 px-3 py-1 rounded text-white text-sm ${
-              o.status === "paid" ? "bg-green-500" : "bg-red-500"
-            }`}
-          >
-            {o.status === "paid" ? "Paid" : "Unpaid"}
-          </span>
+            {/* PAYMENT BADGE */}
+            <span
+              className={`inline-block mt-2 px-3 py-1 rounded text-white text-sm ${
+                o.payment_status === "paid" ? "bg-green-500" : "bg-red-500"
+              }`}
+            >
+              {o.payment_status === "paid" ? "Paid" : "Unpaid"}
+            </span>
+          </div>
 
           <p className="mt-2 font-bold">Total: ₹{o.total}</p>
 

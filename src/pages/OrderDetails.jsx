@@ -40,20 +40,20 @@ export default function OrderDetails() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      
-
       <div className="flex items-center gap-3 justify-between">
         <h1 className="text-2xl font-bold mb-2">Order {shortId(order.id)}</h1>
-        <OrderStatusBadge status={order.status} />
+
+        {/* Order Workflow Badge */}
+        <OrderStatusBadge status={order.order_status} />
       </div>
 
-      {/* Status */}
+      {/* Payment Badge */}
       <span
         className={`inline-block px-3 py-1 rounded text-white ${
-          order.status === "paid" ? "bg-green-600" : "bg-red-600"
+          order.payment_status === "paid" ? "bg-green-600" : "bg-red-600"
         }`}
       >
-        {order.status === "paid" ? "Paid" : "Unpaid"}
+        {order.payment_status === "paid" ? "Paid" : "Unpaid"}
       </span>
 
       <br />
@@ -72,7 +72,7 @@ export default function OrderDetails() {
 
       <p className="text-gray-600">Date: {formatDate(order.created_at)}</p>
 
-      {/* Address Dropdown for Home Delivery */}
+      {/* Address (Only for Delivery) */}
       {order.delivery_type === "delivery" && order.address && (
         <div className="mt-4">
           <button
@@ -84,24 +84,12 @@ export default function OrderDetails() {
 
           {showAddress && (
             <div className="mt-3 bg-gray-100 p-3 rounded">
-              <p>
-                <b>Name:</b> {order.address.name}
-              </p>
-              <p>
-                <b>Phone:</b> {order.address.phone}
-              </p>
-              <p>
-                <b>Address 1:</b> {order.address.line1}
-              </p>
-              <p>
-                <b>Address 2:</b> {order.address.line2}
-              </p>
-              <p>
-                <b>City:</b> {order.address.city}
-              </p>
-              <p>
-                <b>Pincode:</b> {order.address.pincode}
-              </p>
+              <p><b>Name:</b> {order.address.name}</p>
+              <p><b>Phone:</b> {order.address.phone}</p>
+              <p><b>Address 1:</b> {order.address.line1}</p>
+              <p><b>Address 2:</b> {order.address.line2}</p>
+              <p><b>City:</b> {order.address.city}</p>
+              <p><b>Pincode:</b> {order.address.pincode}</p>
             </div>
           )}
         </div>
@@ -130,3 +118,4 @@ export default function OrderDetails() {
     </div>
   );
 }
+

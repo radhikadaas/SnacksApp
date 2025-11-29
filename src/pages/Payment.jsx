@@ -50,12 +50,23 @@ export default function Payment() {
     }
 
     // FINAL ORDER PAYLOAD
+    // const orderPayload = {
+    //   user_id: user.id,
+    //   items: cart,
+    //   total,
+    //   status: "ordered", // default order status
+    //   payment_status : payment_status,
+    //   delivery_type: deliveryType,
+    //   address: deliveryType === "delivery" ? address : null,
+    // };
+
     const orderPayload = {
       user_id: user.id,
+      user_email: user.email, 
       items: cart,
       total,
-      status: "ordered", // default order status
-      payment_status,
+      order_status: "ordered", // correct workflow status
+      payment_status: payment_status, // paid or unpaid
       delivery_type: deliveryType,
       address: deliveryType === "delivery" ? address : null,
     };
@@ -163,11 +174,14 @@ export default function Payment() {
         <div className="bg-gray-200 border border-gray-300 p-4 rounded mb-6">
           <h3 className="font-semibold text-lg mb-1">Delivery Charge Notice</h3>
           <p className="text-sm text-gray-700 leading-relaxed">
-            Our home delivery is fulfilled using <strong>Ola / Uber / Auto</strong>.
-            Delivery charges vary based on your location.
-            <br /><br />
-            We will confirm the delivery charge shortly. You can pay the delivery
-            amount <strong>later at the time of delivery to that Person only.</strong>
+            Our home delivery is fulfilled using{" "}
+            <strong>Ola / Uber / Auto</strong>. Delivery charges vary based on
+            your location.
+            <br />
+            <br />
+            We will confirm the delivery charge shortly. You can pay the
+            delivery amount{" "}
+            <strong>later at the time of delivery to that Person only.</strong>
           </p>
         </div>
       )}
